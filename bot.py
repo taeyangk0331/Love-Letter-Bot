@@ -361,6 +361,7 @@ def run_discord_bot():
                     turns = await draw_card_func(player_dict_shuffled, shuffled_card, message, turns, player_pool)
                 else:
                     print('default')
+                    
 
             elif message.content.startswith('pooh'):
                 num = 0
