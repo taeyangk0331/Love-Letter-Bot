@@ -347,7 +347,10 @@ def run_discord_bot():
                     turns = await draw_card_func(player_dict_shuffled, shuffled_card, message, turns, player_pool)
 
                 elif action == '7' or message.content.startswith('countess'): #not done
-                    await message.channel.send(str(list(player_dict_shuffled.keys())[turns]) + " has choose the countess")
+                    if (list(player_dict_shuffled.values())[turns][1]) == 5 or (list(player_dict_shuffled.values())[turns][1] == 6):
+                        await message.author.send("You are not allow to choose countesss because your hand has either king (6) or prince (5)")
+
+                    await message.channel.send(str(list(player_dict_shuffled.keys())[turns]) + " has choose the countess (6)")
                     list(player_dict_shuffled.values())[turns][0] = 0
                     turns = await draw_card_func(player_dict_shuffled, shuffled_card, message, turns, player_pool)
 
