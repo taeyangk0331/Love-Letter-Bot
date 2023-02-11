@@ -1,5 +1,4 @@
 import discord
-import responses
 import random
 import asyncio
 import time
@@ -197,8 +196,8 @@ def run_discord_bot():
                         return m
 
                 def guard_guess_player(m):
-                    if player_dict_shuffled.keys() in guard_choose_player_.content:
-                        pass
+                    if player_dict_shuffled.keys() in m.content:
+                        return 
 
                 def priest(m):
                     if m.content in list(player_dict_shuffled.keys()):
@@ -234,7 +233,6 @@ def run_discord_bot():
                     await message.channel.send(str(list(player_dict_shuffled.keys())[turns]) + " has choose the guard")
                     await message.channel.send('Choose the player')
                     guard_choose_player_ = await client.wait_for('message', check = guard_choose_player)
-                    ability = 1
                     await message.channel.send(str(list(player_dict_shuffled.keys())[turns]) + ' has chosen ' + str(guard_choose_player_.content) + ' please guess the card (1 ~ 8)')
                     guard_guess_player_ = await client.wait_for('message', check = guard_guess_player)
                     list(player_dict_shuffled.values())[turns][0] = 0
@@ -303,7 +301,7 @@ def run_discord_bot():
                     prince_ = await client.wait_for('message', check = prince)
                     await message.channel.send(str(list(player_dict_shuffled.keys())[turns]) + ' has chosen ' + str(prince_.content))
                     if prince_.content == 'myself':
-                        await message.channel.send(str(list(player_dict_shuffled.values())[turns][1]))
+                        await message.channel.send(str(list(player_dict_shuffled.values())[turns] + '\'s card was ' + str(list(player_dict_shuffled.values())[turns][1])))
                         dump_pile.append(list(player_dict_shuffled.values())[turns][1])
                         list(player_dict_shuffled.values())[turns][1] = int(shuffled_card[0])
                         shuffled_card.pop(0)
@@ -311,6 +309,11 @@ def run_discord_bot():
                         for find_zero in range(2):
                             if player_dict_shuffled[prince_.content][find_zero] == 10:
                                 await message.channel.send(prince_.content + ' is protected\nget rekt bitch')
+                                await message.channel.send('Due to handmaid hidden passive ' + str(list(player_dict_shuffled.values())[turns] + ' has open other card'))
+                                await message.channel.send(str(list(player_dict_shuffled.values())[turns] + '\'s card was ' + str(list(player_dict_shuffled.values())[turns][1])))
+                                dump_pile.append(list(player_dict_shuffled.values())[turns][1])
+                                list(player_dict_shuffled.values())[turns][1] = int(shuffled_card[0])
+                                shuffled_card.pop(0)
                                 break
                             elif player_dict_shuffled[prince_.content][find_zero] != 0:
                                 if player_dict_shuffled[prince_.content][find_zero] != 8:
