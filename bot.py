@@ -3,12 +3,13 @@ import random
 import asyncio
 import time
 
-player_dict = {'dummy1' : [], 'dummy2': [], 'dummy3': [], 'dummy4': []}
+player_dict = {'dummy1': [], 'dummy2': [], 'dummy3': [], 'dummy4': []}
 player_dict_shuffled = {}
 turns = 0
 player_pool = 3
 guard_ability = 0
 card_word = ['guard', 'priest', 'baron', 'handmaid', 'prince', 'king', 'countess', 'princess']
+player_id = []
 
 def player_listing(player_dict):
     sentence = ''
@@ -18,6 +19,24 @@ def player_listing(player_dict):
     sentence += ' joined the game'
     print(sentence)
     return sentence
+
+def change_word(num):
+    if num == '1':
+        return 'Guard (1)'
+    elif num == '2':
+        return 'Priest (2)'
+    elif num == '3':
+        return 'Baron (3)'
+    elif num == '4':
+        return 'Handmaid (4)'
+    elif num == '5':
+        return 'Prince (5)'
+    elif num == '6':
+        return 'King (6)'
+    elif num == '7':
+        return 'Countess (7)'
+    elif num == '8':
+        return 'Princess (8)'
 
 async def draw_card_func(player_dict_shuffled, shuffled_card, message, turns, player_pool):
     if turns != player_pool:
@@ -29,10 +48,12 @@ async def draw_card_func(player_dict_shuffled, shuffled_card, message, turns, pl
                 shuffled_card.pop(0)
             
         await message.channel.send("**" + list(player_dict_shuffled)[turns] + "**" + " turns")
+        await message.channel.send("Dump pile = " + str(dump_pile))
         await message.channel.send("Please **\'check\'** the card!")
         list(player_dict_shuffled.keys())[turns]
 
         print(player_dict_shuffled)
+
         
 
         return turns
@@ -72,6 +93,8 @@ def run_discord_bot():
         channel = str(message.channel) #채널 이름 (일반)
         nickname_mention = str(message.author.mention) #유저 아이디(mention)
         nickname = str(message.author.name) #유저 아이디
+        username_id = str(message.author.id)
+
 
 
         print(f'{username} said: "{user_message}" ({channel})')
@@ -89,6 +112,7 @@ def run_discord_bot():
                 if nickname in player_dict:
                     await message.channel.send(f'{nickname_mention} has left the game')
                     del player_dict[nickname]
+                    player_id.remove(message.author.id)
                     #await message.channel.send(player_dict)
                 else:
                     await message.channel.send(f'{nickname_mention} is not in the game')
@@ -152,6 +176,16 @@ def run_discord_bot():
                         player_dict_shuffled[draw_card][0] = shuffled_card[0]
                         shuffled_card.pop(0)
 
+                    for player in player_id:
+                        user = await client.fetch_user(player)
+                        await user.send("hello")
+                    #author = message.author
+                    #author_name = 'BeCreative'
+                    #private_channel = await author.create_dm()
+                    #await private_channel.send(f"Hello {author_name}, this is a private message from the bot.")
+
+                    
+
                     await message.channel.send("**" + list(player_dict_shuffled)[turns] + "**" + " turns")
                     await message.channel.send("Please **\'check\'** the card!")
 
@@ -172,7 +206,8 @@ def run_discord_bot():
                             list(player_dict_shuffled.values())[turns][find_zero] = int(shuffled_card[0])
                             shuffled_card.pop(0)
                     list(player_dict_shuffled.keys())[turns]
-                    await message.author.send(str(list(player_dict_shuffled.values())[turns][0]) + ' ' + str(list(player_dict_shuffled.values())[turns][1]))
+
+                    await message.author.send('You have [ **' + change_word(str(list(player_dict_shuffled.values())[turns][0])) + '** | **' + change_word(str(list(player_dict_shuffled.values())[turns][1])) + '** ] in your hand')
 
                     list(player_dict_shuffled.values())[turns]
 
@@ -187,42 +222,31 @@ def run_discord_bot():
 
                 def guard_choose_player(m):
                     if m.content in list(player_dict_shuffled.keys()):
-                        return m
+                        return True
 
                 def guard_guess_player(m):
-                    if m.content == '1':
-                        return 1
-                    else:    
-                        for find_zero in range(2):
-                            print('debug1')
-                            if player_dict_shuffled[guard_choose_player_.content][find_zero] != 0:
-                                print('debug2')
-                                if str(player_dict_shuffled[guard_choose_player_.content][find_zero]) == m.content:
-                                    print('True')
-                                    return True
-                                else:
-                                    print('False')
-                                    return False
+                    if m.content in card_word or ( 0 < int(m.content) < 10):
+                        return True
 
                 def priest(m):
                     if m.content in list(player_dict_shuffled.keys()):
-                        return m
+                        return True
 
                 def baron(m):
                     if m.content in list(player_dict_shuffled.keys()):
-                        return m
+                        return True
 
                 def prince(m):
                     if (m.content in list(player_dict_shuffled.keys()) or m.content == 'myself'):
-                        return m
+                        return True
 
                 def king(m):
                     if m.content in list(player_dict_shuffled.keys()):
-                        return m
+                        return True
 
                 def princess(m):
                     if m.content in list(player_dict_shuffled.keys()):
-                        return m
+                        return True
 
                 def result(m):
                     return m.content == 'result'
@@ -234,19 +258,23 @@ def run_discord_bot():
                     guard_choose_player_ = await client.wait_for('message', check = guard_choose_player) #choosing player
                     await message.channel.send(str(list(player_dict_shuffled.keys())[turns]) + ' has chosen ' + str(guard_choose_player_.content) + ' please guess the card (1 ~ 8)')
                     guard_guess_player_ = await client.wait_for('message', check = guard_guess_player)#choosing card
-                    print("debug come out" + guard_guess_player_.content)
+                    print(guard_guess_player_.content in player_dict_shuffled[guard_choose_player_.content])
+                    print(player_dict_shuffled[guard_choose_player_.content])
+                    print(guard_guess_player_.content)
+                    #이거 고쳐야함
+                    #고쳐야할점 user_message가 1일때 loop해서 계속 You are not allow to guess guard 나오게 하기
+                    #local variable match referenced before assignement
+                    #elimination 시발거
+                    #나중에 id 로 user.fetch해서 유저에게 개인으로 DM 보내기
+                    #카드 끝나고 비교
+                    #win point
+                    
+                    if guard_guess_player_.content in player_dict_shuffled[guard_choose_player_.content]:
+                        match = [find_zero for find_zero in player_dict_shuffled[guard_choose_player_.content] if player_dict_shuffled[guard_choose_player_.content][find_zero] == guard_guess_player_.content]
                     if guard_guess_player_.content == '1':
-                        while True:
-                            await message.channel.send("You are not allow to guess guard (1)\nChoose another number")
-                            guard_guess_player_ = await client.wait_for('message', check = guard_guess_player)#choosing card
-                            print('come out')
-                            print(guard_choose_player_.content)
-                            print(guard_guess_player_.content)
-                            print(type(guard_choose_player_.content))
-                            print(type(guard_guess_player_.content))
-                            if guard_choose_player_.content != '1':
-                                continue
-                    if guard_choose_player_.content in guard_guess_player_.content:
+                        await message.channel.send("You are not allow to guess guard (1)\nChoose another number")
+                        guard_guess_player_ = await client.wait_for('message', check = guard_guess_player)#choosing card
+                    if match == True:
                         print("debug True")
                         del player_dict_shuffled[guard_guess_player_]
                         await message.channel.send(guard_guess_player_ + " has been eliminated")
@@ -254,7 +282,7 @@ def run_discord_bot():
                         guard_ability = 0
                         dump_pile.append(list(player_dict_shuffled.values())[turns][0])
                         turns = await draw_card_func(player_dict_shuffled, shuffled_card, message, turns, player_pool)
-                    elif guard_choose_player_.content not in guard_guess_player_.content:
+                    elif match == False:
                         print("debug False")
                         await message.channel.send(str(list(player_dict_shuffled.keys())[turns]) + " has guessed wrong card")
                         list(player_dict_shuffled.values())[turns][0] = 0
@@ -397,7 +425,7 @@ def run_discord_bot():
                 elif action == '8' or message.content.startswith('princess'): #not done
                     await message.channel.send(str(list(player_dict_shuffled.keys())[turns]) + " has choose the princess")
                     await message.channel.send(str(list(player_dict_shuffled.keys())[turns]) + " is elminiated")
-                    del player_dict_shuffled[turns]
+                    del player_dict_shuffled[str(list(player_dict_shuffled.keys())[turns])]
                     player_pool -= 1
                     princess_ = await client.wait_for('message', check = princess)
                     dump_pile.append(list(player_dict_shuffled.values())[turns][0])
