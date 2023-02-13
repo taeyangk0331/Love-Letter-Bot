@@ -53,6 +53,8 @@ async def draw_card_func(player_dict_shuffled, shuffled_card, message, turns, pl
         list(player_dict_shuffled.keys())[turns]
 
         print(player_dict_shuffled)
+        print(turns)
+        print(player_pool)
 
         
 
@@ -225,7 +227,9 @@ def run_discord_bot():
                         return True
 
                 def guard_guess_player(m):
-                    if m.content in card_word or ( 0 < int(m.content) < 10):
+                    if (m.content in card_word):
+                        return True
+                    elif int(m.content) < 10 or int(m.content) > 0:
                         return True
 
                 def priest(m):
@@ -258,9 +262,10 @@ def run_discord_bot():
                     guard_choose_player_ = await client.wait_for('message', check = guard_choose_player) #choosing player
                     await message.channel.send(str(list(player_dict_shuffled.keys())[turns]) + ' has chosen ' + str(guard_choose_player_.content) + ' please guess the card (1 ~ 8)')
                     guard_guess_player_ = await client.wait_for('message', check = guard_guess_player)#choosing card
-                    print(guard_guess_player_.content in player_dict_shuffled[guard_choose_player_.content])
+                    print(int(guard_guess_player_.content) in player_dict_shuffled[guard_choose_player_.content])
                     print(player_dict_shuffled[guard_choose_player_.content])
                     print(guard_guess_player_.content)
+                    print(type(guard_guess_player_.content))
                     #이거 고쳐야함
                     #고쳐야할점 user_message가 1일때 loop해서 계속 You are not allow to guess guard 나오게 하기
                     #local variable match referenced before assignement
@@ -268,26 +273,29 @@ def run_discord_bot():
                     #나중에 id 로 user.fetch해서 유저에게 개인으로 DM 보내기
                     #카드 끝나고 비교
                     #win point
-                    
-                    if guard_guess_player_.content in player_dict_shuffled[guard_choose_player_.content]:
-                        match = [find_zero for find_zero in player_dict_shuffled[guard_choose_player_.content] if player_dict_shuffled[guard_choose_player_.content][find_zero] == guard_guess_player_.content]
                     if guard_guess_player_.content == '1':
-                        await message.channel.send("You are not allow to guess guard (1)\nChoose another number")
-                        guard_guess_player_ = await client.wait_for('message', check = guard_guess_player)#choosing card
-                    if match == True:
+                        while True:
+                            await message.channel.send("You are not allow to guess guard (1)\nChoose another number")
+                            guard_guess_player_ = await client.wait_for('message', check = guard_guess_player)#choosing card
+                            print('come out')
+                            if guard_guess_player_.content != '1':
+                                print("guard guess player content is not 1")
+                                break
+                    if int(guard_guess_player_.content) in player_dict_shuffled[guard_choose_player_.content]:
                         print("debug True")
-                        del player_dict_shuffled[guard_guess_player_]
-                        await message.channel.send(guard_guess_player_ + " has been eliminated")
-                        list(player_dict_shuffled.values())[turns][0] = 0
+                        del player_dict_shuffled[guard_choose_player_.content]
+                        await message.channel.send(str(guard_choose_player_.content) + " has been eliminated")
+                        player_pool -= 1
                         guard_ability = 0
                         dump_pile.append(list(player_dict_shuffled.values())[turns][0])
+                        list(player_dict_shuffled.values())[turns][0] = 0
                         turns = await draw_card_func(player_dict_shuffled, shuffled_card, message, turns, player_pool)
-                    elif match == False:
+                    elif int(guard_guess_player_.content) not in player_dict_shuffled[guard_choose_player_.content]:
                         print("debug False")
                         await message.channel.send(str(list(player_dict_shuffled.keys())[turns]) + " has guessed wrong card")
-                        list(player_dict_shuffled.values())[turns][0] = 0
                         guard_ability = 0
                         dump_pile.append(list(player_dict_shuffled.values())[turns][0])
+                        list(player_dict_shuffled.values())[turns][0] = 0
                         turns = await draw_card_func(player_dict_shuffled, shuffled_card, message, turns, player_pool)
 
                 elif action == '2' or message.content.startswith('priest'):#done yay
@@ -427,7 +435,6 @@ def run_discord_bot():
                     await message.channel.send(str(list(player_dict_shuffled.keys())[turns]) + " is elminiated")
                     del player_dict_shuffled[str(list(player_dict_shuffled.keys())[turns])]
                     player_pool -= 1
-                    princess_ = await client.wait_for('message', check = princess)
                     dump_pile.append(list(player_dict_shuffled.values())[turns][0])
                     list(player_dict_shuffled.values())[turns][0] = 0
                     turns = await draw_card_func(player_dict_shuffled, shuffled_card, message, turns, player_pool)
