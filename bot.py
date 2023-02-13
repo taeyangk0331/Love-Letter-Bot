@@ -40,7 +40,17 @@ def change_word(num):
         return 'Princess (8)'
 
 async def draw_card_func(player_dict_shuffled, shuffled_card, message, turns, player_pool):
-    if turns != player_pool:
+    if len(shuffled_card) == 0:
+                await message.channel.send("The deck_pile is empty\nIt is time to compare cards")
+                dic_max = max(player_dict_shuffled.values())
+                print(dic_max)
+                dic_max.remove(0)
+                await message.channel.send(dic_max)
+                for player in range(len(player_dict_shuffled)):
+                    print(player)
+                    (player_dict_shuffled[player].values()).remove(0)
+                    await message.channel.send(str(player_dict_shuffled.keys()[player]) + ": " +  player_dict_shuffled.values()[player][0])
+    elif turns != player_pool:
         turns += 1
         for find_zero in range(2):
             #print(list(player_dict_shuffled.values())[0][0])
@@ -110,14 +120,12 @@ def run_discord_bot():
                 else:
                     await message.channel.send(f'{nickname_mention} has join the game')
                     player_dict[nickname] = [0, 0]
-                    #await message.channel.send(player_dict)
 
             elif user_message == 'leave':
                 if nickname in player_dict:
                     await message.channel.send(f'{nickname_mention} has left the game')
                     del player_dict[nickname]
                     player_id.remove(message.author.id)
-                    #await message.channel.send(player_dict)
                 else:
                     await message.channel.send(f'{nickname_mention} is not in the game')
 
@@ -128,8 +136,8 @@ def run_discord_bot():
             elif user_message == 'start' and start == False:
                 start = True
                 if len(player_dict) == 4:
-                    card_num = 16
-                    card = [1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 4, 5, 5, 6, 7, 8]
+                    card_num = 6
+                    card = [1, 2, 3, 4, 5, 6]
                     dump_pile = []
 
                     for shuffled in range(len(card)):
@@ -137,9 +145,6 @@ def run_discord_bot():
                         shuffled_card.append(card[random_num])
                         card.pop(random_num)
                         card_num -= 1
-                        #print(shuffled_card)
-                        #print(card_num)
-                        #print(card)
 
                     #before = await message.channel.send("shuffling cards")
                     #time.sleep(0.2)
@@ -154,8 +159,6 @@ def run_discord_bot():
 
                     dump_card = shuffled_card[-1]
                     shuffled_card.pop(-1)
-                    #print(dump_card)
-                    #print(shuffled_card)
 
                     for shuffle in range(len(player_dict)):
                         #print(shuffle)
@@ -184,18 +187,9 @@ def run_discord_bot():
                     for player in player_id:
                         user = await client.fetch_user(player)
                         await user.send("hello")
-                    #author = message.author
-                    #author_name = 'BeCreative'
-                    #private_channel = await author.create_dm()
-                    #await private_channel.send(f"Hello {author_name}, this is a private message from the bot.")
-
-                    
 
                     await message.channel.send("**" + list(player_dict_shuffled)[turns] + "**" + " turns")
                     await message.channel.send("Please **\'check\'** the card!")
-
-
-                    #print(shuffled_card)
 
                 else:
                     await message.channel.send("There should be 4 players to start the game")
@@ -204,9 +198,9 @@ def run_discord_bot():
                 await message.channel.send("The game has already started")
 
             elif (nickname == str(list(player_dict_shuffled.keys())[turns]) or (message.content.startswith('check'))):
+                print(shuffled_card)
                 if turns != 4:
                     for find_zero in range(2):
-                        #print(list(player_dict_shuffled.values())[0][0])
                         if (list(player_dict_shuffled.values())[turns][find_zero]) == 0:
                             list(player_dict_shuffled.values())[turns][find_zero] = int(shuffled_card[0])
                             shuffled_card.pop(0)
@@ -259,7 +253,7 @@ def run_discord_bot():
                 def result(m):
                     return m.content == 'result'
 
-                if action == '1' or message.content.startswith('guard'): #not done
+                if action == '1' or message.content.startswith('guard'): 
                     guard_ability = 1
                     await message.channel.send(str(list(player_dict_shuffled.keys())[turns]) + " has choose the guard (1)")
                     await message.channel.send('Choose the player')
@@ -274,9 +268,6 @@ def run_discord_bot():
                         else:
                             await message.channel.send(str(list(player_dict_shuffled.keys())[turns]) + ' has chosen ' + str(guard_choose_player_.content) + ' please guess the card (1 ~ 8)')
                             guard_guess_player_ = await client.wait_for('message', check = guard_guess_player)#choosing card
-                            #나중에 id 로 user.fetch해서 유저에게 개인으로 DM 보내기
-                            #카드 끝나고 비교
-                            #win point
                             if guard_guess_player_.content == '1' or guard_guess_player_.content == 'guard':
                                 while True:
                                     await message.channel.send("You are not allow to guess guard (1)\nChoose another number")
