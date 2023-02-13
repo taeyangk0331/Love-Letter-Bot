@@ -338,12 +338,14 @@ def run_discord_bot():
                             result_ = await client.wait_for('message', check = result)
                             if player_dict_shuffled[baron_.content][find_zero] > list(player_dict_shuffled.values())[turns][1]: #opponent > me
                                 await message.channel.send(baron_.content + ' has won the battle!\n' + str(list(player_dict_shuffled.keys())[turns]) + ' is eliminated')
+                                del player_dict_shuffled[list(player_dict_shuffled.keys())[turns]]
+                                player_pool -= 1
                                 break
-                                #insert elimination
                             elif player_dict_shuffled[baron_.content][find_zero] < list(player_dict_shuffled.values())[turns][1]:
                                 await message.channel.send(str(list(player_dict_shuffled.keys())[turns]) + ' has won the battle!\n' + baron_.content + ' is eliminated')
+                                del player_dict_shuffled[baron_.content]
+                                player_pool -= 1
                                 break
-                                #insert elimination
                             else:
                                 await message.channel.send('Both players have tied')
                                 break
