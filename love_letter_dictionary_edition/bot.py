@@ -41,15 +41,21 @@ def change_word(num):
 
 async def draw_card_func(player_dict_shuffled, shuffled_card, message, turns, player_pool):
     if len(shuffled_card) == 0:
-                await message.channel.send("The deck_pile is empty\nIt is time to compare cards")
-                dic_max = max(player_dict_shuffled.values())
-                print(dic_max)
-                dic_max.remove(0)
-                await message.channel.send(dic_max)
+                await message.channel.send("The deck_pile is empty\nTime to compare cards")
+                max_value = max(player_dict_shuffled.values())
+                #max_key = [key for key, values in player_dict_shuffled.values() if values == max_value]
+                #ValueError: not enough values to unpack (expected 2, got 1)
+                max_key = [key for key, values in player_dict_shuffled.values() if values == max_value]
                 for player in range(len(player_dict_shuffled)):
                     print(player)
-                    (player_dict_shuffled[player].values()).remove(0)
-                    await message.channel.send(str(player_dict_shuffled.keys()[player]) + ": " +  player_dict_shuffled.values()[player][0])
+                    list_ = list(player_dict_shuffled.values())[player]
+                    #AttributeError: 'list' object has no attribute 'replace'
+                    if 10 in list_:
+                        list_.replace(10, 0)
+                    print(list_)
+                    list_.remove(0)
+                    await message.channel.send(str(list(player_dict_shuffled.keys())[player]) + ": " +  str(list_))
+                await message.channel.send(str(max_key) + " has won the game!")
     elif turns != player_pool:
         turns += 1
         for find_zero in range(2):
@@ -488,13 +494,6 @@ def run_discord_bot():
                     print(player_dict_shuffled[guard_choose_player_.content])
                     print(guard_guess_player_.content)
                     print(type(guard_guess_player_.content))
-                    #이거 고쳐야함
-                    #고쳐야할점 user_message가 1일때 loop해서 계속 You are not allow to guess guard 나오게 하기
-                    #local variable match referenced before assignement
-                    #elimination 시발거
-                    #나중에 id 로 user.fetch해서 유저에게 개인으로 DM 보내기
-                    #카드 끝나고 비교
-                    #win point
                     if guard_guess_player_.content == '1':
                         while True:
                             await message.channel.send("You are not allow to guess guard (1)\nChoose another number")
