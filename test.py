@@ -1,18 +1,39 @@
-class Position:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
+import discord
+from discord.ext import commands
+from colorama import Back, Fore, Style
+import time
+from discord import ui
+
+class Client(commands.Bot):
+    def __init__(self):
+        super().__init__(command_prefix=commands.when_mentioned_or('.'), intents=discord.Intents().all())
+
+    async def on_ready(self):
+        synced = await self.tree.sync()
+        print("Slash CMDs Synced " + str(len(synced)) + " commands")
 
 
-class Rect(Position):
-    width : int
-    height : int
+TOKEN = 'MTA2MDA2NzE5NDExNDk1MzI0Nw.Goc-9w.JUFIj3fmeFWE1vnUdC1RKrQiG3HtjhBoJr971c' #토큰
+intents = discord.Intents.default()
+intents.message_content = True
+client = Client()
 
-    def __init__(self, x, y, width, height):
-        super().__init__(x, y)
-        self.width = width
-        self.height = height
+class TestButtons(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+    @discord.ui.button(label="test")
+    async def test(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.edit_message(content="second button", view=TestButtons2())
 
-position = Position(0, 0)
-rect = Rect(0, 0, 100, 50)
-print(rect.x, rect.y, rect.width, rect.height)
+class TestButtons2(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+    @discord.ui.button(label="test2")
+    async def test2(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.edit_message(content="hello")
+
+@client.tree.command(name="button")
+async def test(interaction: discord.Interaction):
+    await interaction.response.send_message(content="first button", view=TestButtons(), ephemeral=True)
+
+client.run(TOKEN)
