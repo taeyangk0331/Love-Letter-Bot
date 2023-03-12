@@ -4,6 +4,8 @@ import time
 from typing import List
 from discord.ext import commands
 from discord import ui
+import os
+from dotenv import load_dotenv
 
 participant = []
 option = []
@@ -74,7 +76,9 @@ New_Game = Game()
 Deck = Card()
 
 def run_discord_bot():
-    TOKEN = 'MTA2MDA2NzE5NDExNDk1MzI0Nw.Goc-9w.JUFIj3fmeFWE1vnUdC1RKrQiG3HtjhBoJr971c' #토큰
+    load_dotenv()
+    TOKEN = os.getenv("DISCORD_TOKEN")
+
     intents = discord.Intents.default()
     intents.message_content = True
     client = Client()
