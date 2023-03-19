@@ -31,7 +31,6 @@ class Player:
         self.first_hand = "0"
         self.second_hand = "0"
 
-
 class Game:
     start: bool = False
 
@@ -39,7 +38,6 @@ class Game:
         self.turns = turns
         self.guard_ability = guard_ability
         self.winpoint = 0
-
 
 class Client(commands.Bot):
     def __init__(self):
@@ -50,32 +48,43 @@ class Client(commands.Bot):
         synced = await self.tree.sync()
         print("Slash CMDs Synced " + str(len(synced)) + " commands")
 
+class SelectMenu(discord.ui.Select):
+    def __init__(self, options):
+        super().__init__(placeholder = "Choose your card", options=options)
+
+    async def callback(self, interaction:discord.Interaction):
+        values = ",".join(self.values)
+        await interaction.response.edit_message(content = f"You have choose {values}")
+        
+    
+class Select(discord.ui.View):
+    def __init__(self, options):
+        super().__init__()
+        self.add_item(SelectMenu(options))
+
 New_Game = Game()
 Deck = Card()
 
-def choose_plyr():
-    select = Select(
-                options =[
-                    discord.SelectOption(label= participant[0].nickname, value = 0),
-                ])
-    view = View()
-    view.add_item(select)
-    return view
+class LeftButton(discord.ui.Button):
+    def __init__(self, label):
+        super().__init__(label=str(change_word(label)))
 
-def ability(card):
-    pass
+    async def callback(self, interaction: discord.Interaction):
+        options = [
+            discord.SelectOption(label= participant[0].nickname, value = participant[0].nickname),
+            ]
+        await interaction.response.edit_message(content = "Choose the player", view=Select(options))
 
-class Buttons(discord.ui.View):
-    def __init__(self):
-        super().__init__(timeout=None)
-    @discord.ui.button(label="하은이", custom_id = "left")
-    async def first_hand(self, interaction: discord.Interaction, button: discord.ui.Button):
-        view = choose_plyr()
-        await interaction.response.edit_message(content = "하은이 못생김!", view=view)
-    @discord.ui.button(label="바보", custom_id = "right")
-    async def second_hand(self, interaction: discord.Interaction, button: discord.ui.Button):
-        view = choose_plyr()
-        await interaction.response.edit_message(content = "Choose the player!", view=view)
+
+class RightButton(discord.ui.Button):
+    def __init__(self, label):
+        super().__init__(label=str(change_word(label)))
+
+    async def callback(self, interaction: discord.Interaction):
+        options = [
+            discord.SelectOption(label= participant[0].nickname, value = participant[0].nickname),
+            ]
+        await interaction.response.edit_message(content = "Choose the player", view=Select(options))
 
 
 # player list method
@@ -138,7 +147,13 @@ def run_discord_bot():
             player = participant[New_Game.turns]
             first_hand = player.first_hand
             second_hand = player.second_hand
-            await interaction.response.send_message(f"Your card are \"" + str(change_word(first_hand)) + "\",\"" + str(change_word(second_hand)) + "\"", view=Buttons())
+            left_button = LeftButton(first_hand)
+            right_button = RightButton(second_hand)
+
+            view = View()
+            view.add_item(left_button)
+            view.add_item(right_button)
+            await interaction.response.send_message(content="Choose the card", view = view, ephemeral=True)
         else:
             await interaction.response.send_message("It is not your turn", ephemeral=True)
 
